@@ -186,6 +186,21 @@ fn star<T: AsU64>(
 
 	Table::new_from_element(Vector::from_subpath(subpath::Subpath::new_star_polygon(DVec2::splat(-diameter), points, diameter, inner_diameter)))
 }
+/// Generates a teardrop shape with a round body and a pointed tail
+#[node_macro::node(category("Vector: Shape"))]
+fn teardrop(
+	_: impl Ctx,
+	_primary: (),
+	#[unit(" px")]
+	#[default(50.)]
+	radius: f64,
+	#[unit(" px")]
+	#[default(100.)]
+	tail_length: f64,
+) -> Table<Vector> {
+	Table::new_from_element(Vector::from_subpath(subpath::Subpath::new_teardrop(DVec2::ZERO, radius, tail_length)))
+}
+
 
 #[cfg_attr(feature = "wasm", derive(tsify::Tsify))]
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, Hash, DynAny, node_macro::ChoiceType)]
