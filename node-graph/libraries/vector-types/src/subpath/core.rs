@@ -362,6 +362,54 @@ impl<PointId: Identifier> Subpath<PointId> {
 		Subpath::new(manipulator_groups, true)
 	}
 
+	pub fn new_heart(center: DVec2, width: f64, height: f64, top_lobe_roundness: f64, top_dip_ratio: f64, bottom_spike_ratio: f64) -> Self {
+		let w = width.abs() / 2.0;
+		let h = height.abs() / 2.0;
+
+		let dip = top_dip_ratio.clamp(0.0, 1.0);
+		// Cleft sinks down from the top edge (-h). dip=0 -> -h, dip=0.5 -> 0
+		let cleft_y = -h + (2.0 * h * dip);
+
+		// Bottom spike. Default is bottom_spike_ratio = 1.0 -> hitting +h.
+		let spike_y = h * bottom_spike_ratio;
+
+		// Widest point (lobes) Y coordinates. Placed smoothly based on the cleft.
+		let lobe_y = cleft_y + (h - cleft_y) * 0.2;
+
+		let cleft = center + DVec2::new(0.0, cleft_y);
+		let bottom = center + DVec2::new(0.0, spike_y);
+		let left_lobe = center + DVec2::new(-w, lobe_y);
+		let right_lobe = center + DVec2::new(w, lobe_y);
+
+		// Top Bulge
+		// We want the curves to reach approximately the top edge (-h).
+		// The distance from the cleft up to -h is `2.0 * h * dip`.
+		let bulge_base = 2.0 * h * dip;
+		let bulge = bulge_base * (top_lobe_roundness / 50.0);
+
+		// Handles
+		let cleft_spread = w * 0.4;
+		let cleft_out = center + DVec2::new(cleft_spread, cleft_y - bulge);
+		let cleft_in = center + DVec2::new(-cleft_spread, cleft_y - bulge);
+
+		let lobe_up_bulge = cleft_y - bulge * 0.8;
+		let right_in = center + DVec2::new(w, lobe_up_bulge);
+		let left_out = center + DVec2::new(-w, lobe_up_bulge);
+
+		let lower_handle_len = (spike_y - lobe_y).abs() * 0.4;
+		let right_out = center + DVec2::new(w, lobe_y + lower_handle_len);
+		let left_in = center + DVec2::new(-w, lobe_y + lower_handle_len);
+
+		let manipulator_groups = vec![
+			ManipulatorGroup::new(cleft, Some(cleft_in), Some(cleft_out)),
+			ManipulatorGroup::new(right_lobe, Some(right_in), Some(right_out)),
+			ManipulatorGroup::new(bottom, None, None),
+			ManipulatorGroup::new(left_lobe, Some(left_in), Some(left_out)),
+		];
+
+		Subpath::new(manipulator_groups, true)
+	}
+
 	pub fn new_spiral(a: f64, outer_radius: f64, turns: f64, start_angle: f64, delta_theta: f64, spiral_type: SpiralType) -> Self {
 		let mut manipulator_groups = Vec::new();
 		let mut prev_in_handle = None;

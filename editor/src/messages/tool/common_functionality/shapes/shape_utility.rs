@@ -36,6 +36,7 @@ pub enum ShapeType {
 	Grid,
 	Arrow,
 	Teardrop,
+	Heart,
 	Line,      // KEEP THIS AT THE END
 	Rectangle, // KEEP THIS AT THE END
 	Ellipse,   // KEEP THIS AT THE END
@@ -52,6 +53,7 @@ impl ShapeType {
 			Self::Grid => "Grid",
 			Self::Arrow => "Arrow",
 			Self::Teardrop => "Teardrop",
+			Self::Heart => "Heart",
 			Self::Line => "Line",
 			Self::Rectangle => "Rectangle",
 			Self::Ellipse => "Ellipse",

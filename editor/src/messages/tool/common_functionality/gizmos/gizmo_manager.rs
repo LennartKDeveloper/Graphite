@@ -8,6 +8,7 @@ use crate::messages::tool::common_functionality::shape_editor::ShapeState;
 use crate::messages::tool::common_functionality::shapes::arc_shape::ArcGizmoHandler;
 use crate::messages::tool::common_functionality::shapes::circle_shape::CircleGizmoHandler;
 use crate::messages::tool::common_functionality::shapes::grid_shape::GridGizmoHandler;
+use crate::messages::tool::common_functionality::shapes::heart_shape::HeartGizmoHandler;
 use crate::messages::tool::common_functionality::shapes::polygon_shape::PolygonGizmoHandler;
 use crate::messages::tool::common_functionality::shapes::shape_utility::ShapeGizmoHandler;
 use crate::messages::tool::common_functionality::shapes::spiral_shape::SpiralGizmoHandler;
@@ -35,6 +36,7 @@ pub enum ShapeGizmoHandlers {
 	Grid(GridGizmoHandler),
 	Spiral(SpiralGizmoHandler),
 	Teardrop(TeardropGizmoHandler),
+	Heart(HeartGizmoHandler),
 }
 
 impl ShapeGizmoHandlers {
@@ -49,6 +51,7 @@ impl ShapeGizmoHandlers {
 			Self::Grid(_) => "grid",
 			Self::Spiral(_) => "spiral",
 			Self::Teardrop(_) => "teardrop",
+			Self::Heart(_) => "heart",
 			Self::None => "none",
 		}
 	}
@@ -63,6 +66,7 @@ impl ShapeGizmoHandlers {
 			Self::Grid(h) => h.handle_state(layer, mouse_position, document, responses),
 			Self::Spiral(h) => h.handle_state(layer, mouse_position, document, responses),
 			Self::Teardrop(h) => h.handle_state(layer, mouse_position, document, responses),
+			Self::Heart(h) => h.handle_state(layer, mouse_position, document, responses),
 			Self::None => {}
 		}
 	}
@@ -77,6 +81,7 @@ impl ShapeGizmoHandlers {
 			Self::Grid(h) => h.is_any_gizmo_hovered(),
 			Self::Spiral(h) => h.is_any_gizmo_hovered(),
 			Self::Teardrop(h) => h.is_any_gizmo_hovered(),
+			Self::Heart(h) => h.is_any_gizmo_hovered(),
 			Self::None => false,
 		}
 	}
@@ -91,6 +96,7 @@ impl ShapeGizmoHandlers {
 			Self::Grid(h) => h.handle_click(),
 			Self::Spiral(h) => h.handle_click(),
 			Self::Teardrop(h) => h.handle_click(),
+			Self::Heart(h) => h.handle_click(),
 			Self::None => {}
 		}
 	}
@@ -105,6 +111,7 @@ impl ShapeGizmoHandlers {
 			Self::Grid(h) => h.handle_update(drag_start, document, input, responses),
 			Self::Spiral(h) => h.handle_update(drag_start, document, input, responses),
 			Self::Teardrop(h) => h.handle_update(drag_start, document, input, responses),
+			Self::Heart(h) => h.handle_update(drag_start, document, input, responses),
 			Self::None => {}
 		}
 	}
@@ -119,6 +126,7 @@ impl ShapeGizmoHandlers {
 			Self::Grid(h) => h.cleanup(),
 			Self::Spiral(h) => h.cleanup(),
 			Self::Teardrop(h) => h.cleanup(),
+			Self::Heart(h) => h.cleanup(),
 			Self::None => {}
 		}
 	}
@@ -141,6 +149,7 @@ impl ShapeGizmoHandlers {
 			Self::Grid(h) => h.overlays(document, layer, input, shape_editor, mouse_position, overlay_context),
 			Self::Spiral(h) => h.overlays(document, layer, input, shape_editor, mouse_position, overlay_context),
 			Self::Teardrop(h) => h.overlays(document, layer, input, shape_editor, mouse_position, overlay_context),
+			Self::Heart(h) => h.overlays(document, layer, input, shape_editor, mouse_position, overlay_context),
 			Self::None => {}
 		}
 	}
@@ -162,6 +171,7 @@ impl ShapeGizmoHandlers {
 			Self::Grid(h) => h.dragging_overlays(document, input, shape_editor, mouse_position, overlay_context),
 			Self::Spiral(h) => h.dragging_overlays(document, input, shape_editor, mouse_position, overlay_context),
 			Self::Teardrop(h) => h.dragging_overlays(document, input, shape_editor, mouse_position, overlay_context),
+			Self::Heart(h) => h.dragging_overlays(document, input, shape_editor, mouse_position, overlay_context),
 			Self::None => {}
 		}
 	}
@@ -175,6 +185,7 @@ impl ShapeGizmoHandlers {
 			Self::Grid(h) => h.mouse_cursor_icon(),
 			Self::Spiral(h) => h.mouse_cursor_icon(),
 			Self::Teardrop(h) => h.mouse_cursor_icon(),
+			Self::Heart(h) => h.mouse_cursor_icon(),
 			Self::None => None,
 		}
 	}
@@ -229,6 +240,10 @@ impl GizmoManager {
 		// Teardrop
 		if graph_modification_utils::get_teardrop_id(layer, &document.network_interface).is_some() {
 			return Some(ShapeGizmoHandlers::Teardrop(TeardropGizmoHandler::default()));
+		}
+		// Heart
+		if graph_modification_utils::get_heart_id(layer, &document.network_interface).is_some() {
+			return Some(ShapeGizmoHandlers::Heart(HeartGizmoHandler::default()));
 		}
 
 		None

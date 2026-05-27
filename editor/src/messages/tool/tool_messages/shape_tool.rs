@@ -12,6 +12,7 @@ use crate::messages::tool::common_functionality::shapes::arc_shape::Arc;
 use crate::messages::tool::common_functionality::shapes::arrow_shape::Arrow;
 use crate::messages::tool::common_functionality::shapes::circle_shape::Circle;
 use crate::messages::tool::common_functionality::shapes::grid_shape::Grid;
+use crate::messages::tool::common_functionality::shapes::heart_shape::Heart;
 use crate::messages::tool::common_functionality::shapes::line_shape::LineToolData;
 use crate::messages::tool::common_functionality::shapes::polygon_shape::Polygon;
 use crate::messages::tool::common_functionality::shapes::shape_utility::{ShapeToolModifierKey, ShapeType, anchor_overlays, clicked_on_shape_endpoints, transform_cage_overlays};
@@ -191,6 +192,12 @@ fn create_shape_option_widget(shape_type: ShapeType) -> WidgetInstance {
 		MenuListEntry::new("Teardrop").label("Teardrop").on_commit(move |_| {
 			ShapeToolMessage::UpdateOptions {
 				options: ShapeOptionsUpdate::ShapeType(ShapeType::Teardrop),
+			}
+			.into()
+		}),
+		MenuListEntry::new("Heart").label("Heart").on_commit(move |_| {
+			ShapeToolMessage::UpdateOptions {
+				options: ShapeOptionsUpdate::ShapeType(ShapeType::Heart),
 			}
 			.into()
 		}),
@@ -920,7 +927,8 @@ impl Fsm for ShapeToolFsmState {
 					| ShapeType::Grid
 					| ShapeType::Rectangle
 					| ShapeType::Ellipse
-					| ShapeType::Teardrop => {
+					| ShapeType::Teardrop
+					| ShapeType::Heart => {
 						tool_data.data.start(document, input, viewport);
 					}
 					ShapeType::Arrow | ShapeType::Line => {
@@ -944,6 +952,7 @@ impl Fsm for ShapeToolFsmState {
 					ShapeType::Grid => Grid::create_node(tool_options.grid_type),
 					ShapeType::Arrow => Arrow::create_node(tool_options.arrow_shaft_width, tool_options.arrow_head_width, tool_options.arrow_head_length),
 					ShapeType::Teardrop => Teardrop::create_node(tool_options.vertices), // FIXME
+					ShapeType::Heart => Heart::create_node(tool_options.vertices),       // FIXME
 					ShapeType::Line => Line::create_node(),
 					ShapeType::Rectangle => Rectangle::create_node(),
 					ShapeType::Ellipse => Ellipse::create_node(),
@@ -964,6 +973,7 @@ impl Fsm for ShapeToolFsmState {
 					| ShapeType::Rectangle
 					| ShapeType::Ellipse
 					| ShapeType::Teardrop
+					| ShapeType::Heart => {
 						defered_responses.add(GraphOperationMessage::TransformSet {
 							layer,
 							transform: DAffine2::from_scale_angle_translation(DVec2::ONE, 0., input.mouse.position),
@@ -1026,6 +1036,7 @@ impl Fsm for ShapeToolFsmState {
 					ShapeType::Grid => Grid::update_shape(document, input, layer, tool_options.grid_type, tool_data, modifier, responses),
 					ShapeType::Arrow => Arrow::update_shape(document, input, viewport, layer, tool_data, modifier, responses),
 					ShapeType::Teardrop => Teardrop::update_shape(document, input, viewport, layer, tool_data, modifier, responses),
+					ShapeType::Heart => Heart::update_shape(document, input, viewport, layer, tool_data, modifier, responses),
 					ShapeType::Line => Line::update_shape(document, input, viewport, layer, tool_data, modifier, responses),
 					ShapeType::Rectangle => Rectangle::update_shape(document, input, viewport, layer, tool_data, modifier, responses),
 					ShapeType::Ellipse => Ellipse::update_shape(document, input, viewport, layer, tool_data, modifier, responses),
@@ -1283,6 +1294,11 @@ fn update_dynamic_hints(state: &ShapeToolFsmState, responses: &mut VecDeque<Mess
 					HintInfo::keys([Key::Shift], "Constrain Regular").prepend_plus(),
 					HintInfo::keys([Key::Alt], "From Center").prepend_plus(),
 				])],
+				ShapeType::Heart => vec![HintGroup(vec![
+					HintInfo::mouse(MouseMotion::LmbDrag, "Draw Heart"),
+					HintInfo::keys([Key::Shift], "Constrain Regular").prepend_plus(),
+					HintInfo::keys([Key::Alt], "From Center").prepend_plus(),
+				])],
 				ShapeType::Line => vec![HintGroup(vec![
 					HintInfo::mouse(MouseMotion::LmbDrag, "Draw Line"),
 					HintInfo::keys([Key::Shift], "15° Increments").prepend_plus(),
@@ -1315,6 +1331,7 @@ fn update_dynamic_hints(state: &ShapeToolFsmState, responses: &mut VecDeque<Mess
 					HintInfo::keys([Key::Control], "Lock Angle"),
 				]),
 				ShapeType::Teardrop => HintGroup(vec![HintInfo::keys([Key::Shift], "Constrain Regular"), HintInfo::keys([Key::Alt], "From Center")]),
+				ShapeType::Heart => HintGroup(vec![HintInfo::keys([Key::Shift], "Constrain Regular"), HintInfo::keys([Key::Alt], "From Center")]),
 				ShapeType::Line => HintGroup(vec![
 					HintInfo::keys([Key::Shift], "15° Increments"),
 					HintInfo::keys([Key::Alt], "From Center"),
